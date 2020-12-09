@@ -1,0 +1,39 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <div class="main-content">
+        <h3> {{ listing.title }} </h3>
+        {% if user.username == listing.user.username %}
+            <p> Added by you </p>
+        {% else %}
+            <p> Added by {{ listing.user.username }} </p>
+        {% endif %}
+        <div class="listing-image">
+            <img src="{{listing.image_URL}}" alt="img">
+        </div>
+        <p class="listing-description">{{ listing.description }}</p>
+        <h4 class="listing-price"> ${{ listing.current_bid }} </h4>
+        
+        {% if user.username == listing.user.username %}
+            <a class="btn btn-primary" href="#"> Close Auction </a>
+        {% else %}
+            <form class="bid-form" action="#" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <small class="form-text text-muted">Number of bids so far</small>
+                    <input type="text" class="form-control bid-value mb-2">
+                    <input type="submit" class="btn btn-primary">
+                    <a class="btn btn-primary" href="#"> Add to Watchlist </a>
+                    </div>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="listing-comments main-content">
+        {% for comment in listing.comments.all %}
+            <p> {{comment.content}} </p>
+        {% endfor %}
+    </div>
+
+{% endblock %}

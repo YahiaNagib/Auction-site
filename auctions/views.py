@@ -3,12 +3,24 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-
-from .models import User
+from .models import User, Listing, Category, Comment, Bid
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    listings = Listing.objects.filter(is_active=True).order_by("-created_date").all()
+    context = {
+        "listings": listings
+    }
+    return render(request, "auctions/index.html", context)
+
+
+def listing_page(request, id):
+    listing = Listing.objects.filter(id=id).first()
+    context = {
+        "listing": listing
+    }
+    return render(request, "auctions/listing-page.html", context)
+
 
 
 def login_view(request):

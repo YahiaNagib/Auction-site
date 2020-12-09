@@ -1,3 +1,76 @@
-body {
-    padding: 10px;
+/* start bootstrap */
+
+.navbar {
+  border-radius: 0;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.nav > li > a,
+.navbar-brand {
+  padding: 15px 12px;
+}
+
+.navbar-brand {
+  font-size: 1.2em;
+  color: #ffff;
+}
+
+.navbar .nav-link {
+  color: #ffff;
+}
+
+.navbar .dropdown-toggle {
+  text-decoration: none;
+  color: #ffff;
+}
+
+.form-control {
+  position: relative;
+}
+
+.row {
+  margin: 0;
+}
+/* end bootstrap */
+
+.main-content {
+  border: 1px solid #eee;
+  padding: 30px;
+  margin-bottom: 20px;
+}
+
+/* start listing main page */
+
+@media (max-width: 1000px) {
+  .listing {
+    text-align: center;
+  }
+}
+
+.listing-image img {
+  max-width: 100%;
+}
+
+.listing-content h3 a {
+    text-decoration: none;
+    color: black;
+}
+
+/* end listing main page */
+
+
+/* listing page */
+
+.bid-form .bid-value {
+  display: block;
+  width: 40%;
+}
+
+
+
+/* end listing page */
+
+.clear-fix {
+  clear: both;
 }

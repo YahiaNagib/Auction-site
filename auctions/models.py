@@ -4,8 +4,8 @@ from django.utils import timezone
 
 
 class User(AbstractUser):
+    # watchlist = models.ManyToManyField(Listing, on_delete=models.CASCADE)
     pass
-
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
@@ -18,6 +18,7 @@ class Listing(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField()
     start_bid = models.FloatField()
+    current_bid = models.FloatField()
     created_date = models.DateTimeField(default=timezone.now)
     image_URL = models.URLField(blank=True, default="")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -28,9 +29,13 @@ class Listing(models.Model):
         return self.title
 
 
+class Watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+
 class Comment(models.Model):
     content = models.TextField()
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, related_name="comments", on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
