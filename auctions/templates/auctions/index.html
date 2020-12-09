@@ -12,7 +12,7 @@
                 <h3 class="mb-3"> <a href="{% url 'listing-page' listing.id %}">{{ listing.title }}</a> </h3>
                 <p> <strong>price:</strong> ${{ listing.current_bid }} </p>
                 <p> {{ listing.description }} </p>
-                <p> Created {{ listing.created_date }} </p>
+                <p> Created {{ listing.date }} </p>
             </div>
         </div>
     {% endfor %}

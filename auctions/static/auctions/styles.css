@@ -35,7 +35,7 @@
 /* end bootstrap */
 
 .main-content {
-  border: 1px solid #eee;
+  border: 2px solid #eee;
   padding: 30px;
   margin-bottom: 20px;
 }
@@ -67,7 +67,10 @@
   width: 40%;
 }
 
-
+.listing-comments {
+  border: 1px solid #eee;
+  padding: 20px;
+}
 
 /* end listing page */
 

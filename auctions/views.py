@@ -1,13 +1,14 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .models import User, Listing, Category, Comment, Bid
+from .models import User, Listing, Category, Comment, Bid, Watchlist
 
 
 def index(request):
-    listings = Listing.objects.filter(is_active=True).order_by("-created_date").all()
+    listings = Listing.objects.filter(is_active=True).order_by("-date").all()
     context = {
         "listings": listings
     }
@@ -16,11 +17,40 @@ def index(request):
 
 def listing_page(request, id):
     listing = Listing.objects.filter(id=id).first()
+    user_watchlist = [item.listing for item in request.user.watchlist.all()]
+    is_watched = listing in user_watchlist
     context = {
-        "listing": listing
+        "listing": listing,
+        "is_watched": is_watched
     }
     return render(request, "auctions/listing-page.html", context)
 
+@login_required
+def watchlist_page(request):
+    watchlist_listings = Watchlist.objects.filter(user=request.user).all()
+    context = {
+        "watchlist_listings": watchlist_listings
+    }
+    return render(request, "auctions/watchlist.html", context)
+
+@login_required
+def add_watchlist(request, id):
+    listing = Listing.objects.filter(id=id).first()
+    watchlist = Watchlist(listing=listing, user=request.user)
+    watchlist.save()
+    return redirect("watchlist-page")
+
+@login_required
+def remove_watchlist(request, id):
+    watchlist_item = Watchlist.objects.filter(listing__id=id).first()
+    watchlist_item.delete()
+    return redirect("watchlist-page")
+
+def close_bid(request, id):
+    listing = Listing.objects.filter(id=id).first()
+    listing.is_active = False
+    listing.save()
+    return redirect("index")
 
 
 def login_view(request):
