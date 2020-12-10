@@ -20,9 +20,10 @@ class Listing(models.Model):
     current_bid = models.FloatField()
     date = models.DateTimeField(default=timezone.now)
     image_URL = models.URLField(blank=True, default="")
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name="listings", on_delete=models.CASCADE)
     category = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
+    winner = models.ForeignKey(User, related_name="win_listings", on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -45,4 +46,4 @@ class Bid(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Listing: {listing.title}, value:{self.bid}"
+        return f"Listing: {self.listing.title}, value:{self.bid}"

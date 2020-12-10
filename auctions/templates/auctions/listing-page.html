@@ -10,6 +10,9 @@
                 <h3> {{ listing.title }} </h3>
             {% else %}
                 <h3> {{ listing.title }} (CLOSED) </h3>
+                {% if listing.winner == user %}
+                <h4> Congratulations! You won this auction </h4>
+                {% endif %}
             {% endif %}
             {% if user.username == listing.user.username %}
                 <p> Added by you </p>
@@ -27,12 +30,14 @@
             {% if listing.is_active %}
                 {% if user.username == listing.user.username %}
                     <a class="btn btn-primary" href="{% url 'close-bid' listing.id %}"> Close Auction </a>
+                    <small class="form-text text-muted">{{bids_number}} bid(s) so far</small>
                 {% else %}
-                    <form class="bid-form" action="#" method="POST">
+                    <form class="bid-form" action="{% url 'add-bid' %}" method="POST">
                         {% csrf_token %}
                         <div class="form-group">
-                            <small class="form-text text-muted">Number of bids so far</small>
-                            <input type="text" class="form-control bid-value mb-2">
+                            <small class="form-text text-muted">{{bids_number}} bid(s) so far</small>
+                            <input type="text" class="form-control bid-value mb-2" name="bid" required>
+                            <input type="text" value={{listing.id}} name="listing-id" hidden>
                             <input type="submit" class="btn btn-primary">
                             {% if is_watched %}
                                 <a class="btn btn-danger" href="{% url 'remove-watchlist' listing.id %}"> Remove from Watchlist </a>
@@ -55,10 +60,11 @@
                     </div>
                 {% endfor %}
             </div>
-            <form action="#" method="POST">
+            <form action="{% url 'add-comment' %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                    <textarea type="text" class="form-control bid-value mb-2"></textarea>
+                    <textarea type="text" name="comment-content" class="form-control bid-value mb-2" required></textarea>
+                    <input type="text" name="listing-id" value={{listing.id}} hidden>
                     <input type="submit" value="Add comment" class="btn btn-primary">
                 </div>
             </form>
