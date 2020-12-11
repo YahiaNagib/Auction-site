@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -32,6 +33,7 @@ def add_listing(request):
                 
             form.instance.current_bid = form.cleaned_data.get("start_bid")
             form.save()
+            messages.success(request, "Your item has been added successfully")
             return redirect("index")
 
     category_list = [i.category_name for i in Category.objects.all()]
@@ -44,6 +46,9 @@ def add_listing(request):
 @login_required
 def listing_page(request, id):
     listing = Listing.objects.filter(id=id).first()
+    if not listing:
+        messages.error(request, "This item does not exist")
+        return redirect("index")
     listing_bids = Bid.objects.filter(listing=listing)
     is_highest_bid = False
     if listing_bids.count() > 0:
@@ -75,6 +80,10 @@ def watchlist_page(request):
 @login_required
 def add_watchlist(request, id):
     listing = Listing.objects.filter(id=id).first()
+    if not listing.is_active:
+        messages.error(request, "Unable to add an unactive item to the watchlist")
+        return redirect("index")
+
     watchlist = Watchlist(listing=listing, user=request.user)
     watchlist.save()
     return redirect("watchlist-page")
@@ -82,13 +91,34 @@ def add_watchlist(request, id):
 # remove a listing from the wathchlist
 @login_required
 def remove_watchlist(request, id):
-    watchlist_item = Watchlist.objects.filter(listing__id=id).first()
+    listing = Listing.objects.filter(id=id).first()
+    if not listing:
+        messages.error(request, "This item does not exist")
+        return redirect("index")
+
+    watchlist_item = Watchlist.objects.filter(listing__id=id, user=request.user).first()
+    if not watchlist_item:
+        messages.error(request, "This item does not exist in your watchlist")
+        return redirect("index")
+
     watchlist_item.delete()
     return redirect("watchlist-page")
 
 # close a bid
 def close_bid(request, id):
     listing = Listing.objects.filter(id=id).first()
+    if not listing:
+        messages.error(request, "This item does not exist")
+        return redirect("index")
+
+    if listing.user != request.user:
+        messages.error(request, "Error, you can not close this item")
+        return redirect("index")
+
+    if not listing.is_active:
+        messages.error(request, "This item is already closed!")
+        return redirect("index")
+
     listing.is_active = False
     listing_bids = Bid.objects.filter(listing__id=id).order_by("-date")
     if listing_bids.count() != 0:
@@ -96,11 +126,13 @@ def close_bid(request, id):
     listing.save()
     return redirect("index")
 
-
 def add_bid(request):
     if request.method == "POST":
         id = request.POST["listing-id"]
         listing = Listing.objects.filter(id=id).first()
+        if not listing:
+            messages.error(request, "This item does not exist")
+            return redirect("index")
         listing_current_bid = listing.current_bid
         bid_value = float(request.POST["bid"])
         
@@ -109,6 +141,10 @@ def add_bid(request):
             listing.save()
             bid = Bid(bid=bid_value, listing=listing, user=request.user)
             bid.save()
+            messages.success(request, "Your bid has been added")
+            return redirect(f"/listing/{id}")
+        else:
+            messages.warning(request, "Your bid must be higher than the current bid")
             return redirect(f"/listing/{id}")
 
 # add comment
@@ -117,6 +153,9 @@ def add_comment(request):
         content = request.POST["comment-content"]
         id = request.POST["listing-id"]
         listing = Listing.objects.filter(id=id).first()
+        if not listing:
+            messages.error(request, "This item does not exist")
+            return redirect("index")
         comment = Comment(content=content, listing=listing, user=request.user)
         comment.save()
         return redirect(f"/listing/{id}")
@@ -128,7 +167,6 @@ def category_page(request):
         "categories": category_list
     }
     return render(request, "auctions/category-list.html", context)
-
 
 def category_search(request):
     category = request.GET.get("category")
@@ -143,7 +181,6 @@ def category_search(request):
         "listings": results
     }
     return render(request, "auctions/index.html", context)
-
 
 def login_view(request):
     if request.method == "POST":
