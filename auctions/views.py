@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from .models import User, Listing, Category, Comment, Bid, Watchlist
+from .forms import AddListingForm
 
 # main page
 def index(request):
@@ -13,6 +14,30 @@ def index(request):
         "listings": listings
     }
     return render(request, "auctions/index.html", context)
+
+
+@login_required
+def add_listing(request):
+    if request.method == "POST":
+        form = AddListingForm(request.POST)
+        if form.is_valid():
+            form.instance.user = request.user
+            category = form.cleaned_data.get("category")
+            form.instance.category = category
+            category_list = [i.category_name for i in Category.objects.all()]
+            if category not in category_list:
+                new_category = Category(category_name=category)
+                new_category.save()
+                
+            form.instance.current_bid = form.cleaned_data.get("start_bid")
+            form.save()
+            return redirect("index")
+
+    category_list = [i.category_name for i in Category.objects.all()]
+    context = {
+        "form": AddListingForm(data_list=category_list)
+    }
+    return render(request, "auctions/add-listing.html", context)
 
 # single listing page
 @login_required
@@ -86,6 +111,14 @@ def add_comment(request):
         comment = Comment(content=content, listing=listing, user=request.user)
         comment.save()
         return redirect(f"/listing/{id}")
+
+
+def category_page(request):
+    pass
+
+
+def category_search(request):
+    pass
 
 
 def login_view(request):
