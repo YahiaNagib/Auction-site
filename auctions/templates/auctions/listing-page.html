@@ -10,7 +10,7 @@
             {% else %}
                 <h3> {{ listing.title }} (CLOSED) </h3>
                 {% if listing.winner == user %}
-                <h4> Congratulations! You won this auction </h4>
+                <h4> Congratulations! You won this item </h4>
                 {% endif %}
             {% endif %}
             {% if user.username == listing.user.username %}
@@ -34,7 +34,12 @@
                     <form class="bid-form" action="{% url 'add-bid' %}" method="POST">
                         {% csrf_token %}
                         <div class="form-group">
-                            <small class="form-text text-muted">{{bids_number}} bid(s) so far</small>
+                            <small class="form-text text-muted">
+                                {{bids_number}} bid(s) so far
+                                {% if is_highest_bid %}
+                                    (Your bid is the current bid)
+                                {% endif %}
+                            </small>
                             <input type="text" class="form-control bid-value mb-2" name="bid" required>
                             <input type="text" value={{listing.id}} name="listing-id" hidden>
                             <input type="submit" class="btn btn-primary">

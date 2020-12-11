@@ -15,6 +15,7 @@ urlpatterns = [
     path("addcomment", views.add_comment, name="add-comment"),
     path("addbid", views.add_bid, name="add-bid"),
     path("addlisting", views.add_listing, name="add-listing"),
-
+    path("categories", views.category_page, name="category-page"),
+    path("search", views.category_search, name="category-search"),
 
 ]

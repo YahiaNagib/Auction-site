@@ -2,10 +2,13 @@
 
 {% block body %}
     
+    <h3 class="mb-4"> Categories </h3>
+
+    <h3> <a href="/search?category=nocategory"> No category </a> </h3>
     {% for category in categories %}
 
-        <h3> <a href="#"> category.category_name </a> </h3>
+        <h3> <a href="/search?category={{category.category_name}}"> {{category.category_name}} </a> </h3>
 
-    {% endif %}
+    {% endfor %}
 
 {% endblock %}

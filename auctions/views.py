@@ -11,6 +11,7 @@ from .forms import AddListingForm
 def index(request):
     listings = Listing.objects.filter(is_active=True).order_by("-date").all()
     context = {
+        "title": "Active Listings",
         "listings": listings
     }
     return render(request, "auctions/index.html", context)
@@ -43,13 +44,19 @@ def add_listing(request):
 @login_required
 def listing_page(request, id):
     listing = Listing.objects.filter(id=id).first()
-    listing_bids = Bid.objects.filter(listing=listing).count()
+    listing_bids = Bid.objects.filter(listing=listing)
+    is_highest_bid = False
+    if listing_bids.count() > 0:
+        highest_bid = listing_bids.order_by("-date")[0]
+        is_highest_bid = highest_bid.user.username == request.user.username
+
     user_watchlist = [item.listing for item in request.user.watchlist.all()]
     is_watched = listing in user_watchlist
     context = {
         "listing": listing,
         "is_watched": is_watched,
-        "bids_number": listing_bids
+        "bids_number": listing_bids.count(),
+        "is_highest_bid": is_highest_bid
     }
     return render(request, "auctions/listing-page.html", context)
 
@@ -58,9 +65,11 @@ def listing_page(request, id):
 def watchlist_page(request):
     watchlist_listings = Watchlist.objects.filter(user=request.user).all()
     context = {
-        "watchlist_listings": watchlist_listings
+        # "watchlist_listings": watchlist_listings
+        "title": "Watchlist",
+        "listings": [i.listing for i in watchlist_listings]
     }
-    return render(request, "auctions/watchlist.html", context)
+    return render(request, "auctions/index.html", context)
 
 # add a listing to the wathchlist
 @login_required
@@ -81,9 +90,9 @@ def remove_watchlist(request, id):
 def close_bid(request, id):
     listing = Listing.objects.filter(id=id).first()
     listing.is_active = False
-    highest_bid = Bid.objects.filter(listing__id=id).order_by("-date")
-    if highest_bid.count() != 0:
-        listing.winner = highest_bid[0].user
+    listing_bids = Bid.objects.filter(listing__id=id).order_by("-date")
+    if listing_bids.count() != 0:
+        listing.winner = listing_bids[0].user
     listing.save()
     return redirect("index")
 
@@ -114,11 +123,26 @@ def add_comment(request):
 
 
 def category_page(request):
-    pass
+    category_list = Category.objects.all()
+    context = {
+        "categories": category_list
+    }
+    return render(request, "auctions/category-list.html", context)
 
 
 def category_search(request):
-    pass
+    category = request.GET.get("category")
+    if category == "nocategory":
+        results = Listing.objects.filter(is_active=True, category="").all()
+    else:
+        results = Listing.objects.filter(is_active=True, category=category).all()
+            
+    context = {
+        # "watchlist_listings": watchlist_listings
+        "title": f"{category}",
+        "listings": results
+    }
+    return render(request, "auctions/index.html", context)
 
 
 def login_view(request):
