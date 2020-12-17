@@ -14,9 +14,9 @@
                 {% endif %}
             {% endif %}
             {% if user.username == listing.user.username %}
-                <p> Added by you </p>
+                <p> Listed by you </p>
             {% else %}
-                <p> Added by {{ listing.user.username }} </p>
+                <p> Listed by {{ listing.user.username }} </p>
             {% endif %}
             <div class="listing-image">
                 <img src="{{listing.image_URL}}" alt="img">
